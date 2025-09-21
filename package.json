@@ -1,0 +1,45 @@
+{
+  "name": "razisharp-website",
+  "version": "1.0.0",
+  "description": "Sitio web oficial de Razisharp - Streamer de Anime",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "bcryptjs": "2.4.3",
+    "framer-motion": "10.16.5",
+    "jsonwebtoken": "9.0.2",
+    "lucide-react": "0.294.0",
+    "mongodb": "6.3.0",
+    "next": "14.0.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "sweetalert2": "^11.23.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "2.4.6",
+    "@types/jsonwebtoken": "9.0.5",
+    "@types/node": "20.8.0",
+    "@types/react": "18.2.0",
+    "@types/react-dom": "18.2.0",
+    "autoprefixer": "10.4.16",
+    "eslint": "8.52.0",
+    "eslint-config-next": "14.0.0",
+    "postcss": "8.4.31",
+    "tailwindcss": "3.3.0",
+    "typescript": "5.2.2"
+  },
+  "keywords": [
+    "streamer",
+    "anime",
+    "voting",
+    "community",
+    "razisharp"
+  ],
+  "author": "Razisharp",
+  "license": "MIT"
+}
