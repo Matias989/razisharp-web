@@ -3,7 +3,7 @@ import Head from 'next/head'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Crown, Users, Star, Play, Zap, Shield, ExternalLink } from 'lucide-react'
+import { Crown, Users, Star, Play, Zap, Shield, ExternalLink, User, LogOut } from 'lucide-react'
 import { Stats } from '../types'
 
 export default function Home() {
@@ -14,6 +14,7 @@ export default function Home() {
     activeUsers: 0
   })
   const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState<any>(null)
 
   useEffect(() => {
     // Cargar estadísticas
@@ -24,7 +25,28 @@ export default function Home() {
         setLoading(false)
       })
       .catch(() => setLoading(false))
+
+    // Verificar autenticación
+    const token = localStorage.getItem('token')
+    const userData = localStorage.getItem('user')
+    
+    if (token && userData) {
+      try {
+        setUser(JSON.parse(userData))
+      } catch (error) {
+        console.error('Error parsing user data:', error)
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+      }
+    }
   }, [])
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    setUser(null)
+    window.location.reload()
+  }
 
   return (
     <>
@@ -81,12 +103,28 @@ export default function Home() {
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="flex items-center space-x-4"
               >
-                <Link href="/login" className="btn-ghost">
-                  Login
-                </Link>
-                <Link href="/register" className="btn-primary">
-                  Registrarse
-                </Link>
+                {user ? (
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2 text-white">
+                      {user.isAdmin && <Crown className="w-4 h-4 text-yellow-400" />}
+                      <User className="w-4 h-4" />
+                      <span className="text-sm">Hola, {user.username}</span>
+                    </div>
+                    <button onClick={handleLogout} className="btn-ghost text-sm flex items-center justify-center">
+                      <LogOut className="w-4 h-4 mr-1" />
+                      Salir
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <Link href="/login" className="btn-ghost">
+                      Login
+                    </Link>
+                    <Link href="/register" className="btn-primary">
+                      Registrarse
+                    </Link>
+                  </>
+                )}
               </motion.div>
             </nav>
           </div>
