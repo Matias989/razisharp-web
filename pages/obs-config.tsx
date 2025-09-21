@@ -1,11 +1,31 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Copy, Check, ExternalLink, Monitor, Code, Settings } from 'lucide-react'
+import { ArrowLeft, Copy, Check, ExternalLink, Monitor, Code, Settings, Shield, Crown } from 'lucide-react'
 
 export default function OBSConfigPage() {
   const [copied, setCopied] = useState<string | null>(null)
+  const [user, setUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    // Verificar autenticación
+    const token = localStorage.getItem('token')
+    const userData = localStorage.getItem('user')
+    
+    if (token && userData) {
+      try {
+        const parsedUser = JSON.parse(userData)
+        setUser(parsedUser)
+      } catch (error) {
+        console.error('Error parsing user data:', error)
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+      }
+    }
+    setLoading(false)
+  }, [])
 
   const endpoints = [
     {
@@ -55,6 +75,52 @@ export default function OBSConfigPage() {
     return `https://tu-dominio.com${endpoint}`
   }
 
+  // Mostrar loading
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-dark flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-cyan-400 mx-auto mb-4"></div>
+          <p className="text-cyan-400 text-xl">Verificando acceso...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Verificar si es admin
+  if (!user || !user.isAdmin) {
+    return (
+      <>
+        <Head>
+          <title>Acceso Denegado - Razisharp</title>
+          <meta name="description" content="Acceso restringido a administradores" />
+        </Head>
+
+        <div className="min-h-screen bg-gradient-dark flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-32 h-32 mx-auto mb-8 bg-red-500/20 rounded-full flex items-center justify-center">
+              <Shield className="w-16 h-16 text-red-400" />
+            </div>
+            <h1 className="text-4xl font-bold text-white mb-4 font-display">
+              Acceso Denegado
+            </h1>
+            <p className="text-xl text-gray-300 mb-8">
+              Esta página es solo para administradores
+            </p>
+            <div className="space-x-4">
+              <Link href="/login" className="btn-primary">
+                Iniciar Sesión
+              </Link>
+              <Link href="/" className="btn-secondary">
+                Volver al Inicio
+              </Link>
+            </div>
+          </div>
+        </div>
+      </>
+    )
+  }
+
   return (
     <>
       <Head>
@@ -96,8 +162,13 @@ export default function OBSConfigPage() {
               <h1 className="text-4xl font-bold text-white mb-2 font-display flex items-center justify-center">
                 <Monitor className="w-10 h-10 mr-3 text-cyan-400" />
                 Configuración OBS
+                <Crown className="w-8 h-8 ml-3 text-yellow-400" />
               </h1>
               <p className="text-cyan-400">Endpoints para integrar con OBS Studio</p>
+              <div className="mt-2 flex items-center justify-center space-x-2">
+                <Shield className="w-4 h-4 text-yellow-400" />
+                <span className="text-yellow-400 text-sm font-medium">Solo Administradores</span>
+              </div>
             </div>
 
             <div className="w-32"></div>
