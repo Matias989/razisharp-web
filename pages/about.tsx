@@ -1,5 +1,6 @@
 import Head from 'next/head'
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Skull, ArrowLeft, Star, Users, Play, Crown, Zap, Shield, Tv, MessageCircle, ExternalLink } from 'lucide-react'
 
@@ -49,11 +50,17 @@ export default function AboutPage() {
               transition={{ duration: 0.8 }}
             >
               <motion.div 
-                className="w-32 h-32 mx-auto mb-8 bg-gradient-cyan rounded-full flex items-center justify-center glow-cyan-strong animate-float"
+                className="w-32 h-32 mx-auto mb-8 bg-gradient-cyan rounded-full flex items-center justify-center glow-cyan-strong animate-float overflow-hidden"
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <Skull className="w-16 h-16 text-white" />
+                <Image 
+                  src="/Icono music.png" 
+                  alt="Razisharp Character" 
+                  width={128} 
+                  height={128}
+                  className="w-32 h-32"
+                />
               </motion.div>
               
               <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 font-display text-glow-strong">
@@ -145,13 +152,19 @@ export default function AboutPage() {
         <footer className="relative z-10 py-12 border-t border-cyan-400/20 mt-20">
           <div className="container mx-auto px-4 text-center">
             <div className="flex items-center justify-center space-x-3 mb-4">
-              <div className="w-8 h-8 bg-gradient-cyan rounded-full flex items-center justify-center">
-                <Skull className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 bg-gradient-cyan rounded-full flex items-center justify-center overflow-hidden">
+                <Image 
+                  src="/Icono music.png" 
+                  alt="RaziClub Logo" 
+                  width={20} 
+                  height={20}
+                  className="w-8 h-8"
+                />
               </div>
-              <span className="text-xl font-bold text-white font-display">Razisharp</span>
+              <span className="text-xl font-bold text-white font-display">RaziClub</span>
             </div>
             <p className="text-gray-400">
-              © 2024 Razisharp. Todos los derechos reservados.
+              © 2024 RaziClub. Todos los derechos reservados.
             </p>
           </div>
         </footer>

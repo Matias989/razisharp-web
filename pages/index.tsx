@@ -87,14 +87,14 @@ export default function Home() {
               >
                 <div className="w-10 h-10 bg-gradient-cyan rounded-full flex items-center justify-center glow-cyan overflow-hidden">
                   <Image 
-                    src="/ADARKF_3.png" 
-                    alt="Razisharp Logo" 
+                    src="/Icono music.png" 
+                    alt="RaziClub Logo" 
                     width={24} 
                     height={24}
                     className="w-10 h-10"
                   />
                 </div>
-                <span className="text-2xl font-bold text-white font-display">Razisharp</span>
+                <span className="text-2xl font-bold text-white font-display">RaziClub</span>
               </motion.div>
               
               <motion.div 
@@ -452,14 +452,14 @@ export default function Home() {
               <div className="flex items-center justify-center space-x-3 mb-6">
                 <div className="w-10 h-10 bg-gradient-cyan rounded-full flex items-center justify-center glow-cyan overflow-hidden">
                   <Image 
-                    src="/ADARKF_3.png" 
-                    alt="Razisharp Logo" 
+                    src="/Icono music.png" 
+                    alt="RaziClub Logo" 
                     width={24} 
                     height={24}
                     className="w-10 h-10"
                   />
                 </div>
-                <span className="text-2xl font-bold text-white font-display">Razisharp</span>
+                <span className="text-2xl font-bold text-white font-display">RaziClub</span>
               </div>
               
               {/* Enlaces a Redes Sociales */}
@@ -498,7 +498,7 @@ export default function Home() {
             
             <div className="text-center">
               <p className="text-gray-400 mb-2">
-                © 2024 Razisharp. Todos los derechos reservados.
+                © 2024 RaziClub. Todos los derechos reservados.
               </p>
               <p className="text-gray-500 text-sm">
                 Hecho con ❤️ para la comunidad de anime
