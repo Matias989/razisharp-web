@@ -1,5 +1,71 @@
 import Swal from 'sweetalert2'
 
+// Función robusta para restaurar completamente el scroll y estilos del body
+const restoreBodyScroll = () => {
+  // Esperar un poco para asegurar que SweetAlert2 haya terminado sus animaciones
+  setTimeout(() => {
+    // Remover todas las clases de SweetAlert2 del body
+    document.body.classList.remove('swal2-shown', 'swal2-height-auto', 'swal2-no-backdrop')
+    
+    // Remover todas las clases de SweetAlert2 del html
+    document.documentElement.classList.remove('swal2-height-auto', 'swal2-no-backdrop')
+    
+    // Limpiar todos los estilos inline del body relacionados con SweetAlert2
+    const bodyStyle = document.body.getAttribute('style')
+    if (bodyStyle) {
+      // Remover overflow: hidden y padding-right
+      let newStyle = bodyStyle
+        .replace(/overflow:\s*hidden[^;]*;?/g, '')
+        .replace(/padding-right:\s*[^;]*;?/g, '')
+        .replace(/;+/g, ';')
+        .replace(/^;|;$/g, '')
+      
+      if (newStyle.trim()) {
+        document.body.setAttribute('style', newStyle)
+      } else {
+        document.body.removeAttribute('style')
+      }
+    }
+    
+    // Forzar la restauración del scroll
+    document.body.style.overflow = 'auto'
+    document.body.style.paddingRight = '0px'
+    
+    // Limpiar cualquier contenedor residual de SweetAlert2
+    const containers = document.querySelectorAll('.swal2-container')
+    containers.forEach(container => {
+      if (container.parentNode) {
+        container.parentNode.removeChild(container)
+      }
+    })
+    
+    // Forzar reflow para asegurar que los cambios se apliquen
+    document.body.offsetHeight
+    
+    // Verificar que el scroll funcione
+    if (document.body.scrollHeight > window.innerHeight) {
+      document.body.style.overflow = 'auto'
+    }
+  }, 150)
+}
+
+// Función para limpiar completamente todos los modales
+const cleanupModals = () => {
+  // Cerrar todos los modales activos
+  Swal.close()
+  
+  // Limpiar todos los contenedores de SweetAlert2
+  const containers = document.querySelectorAll('.swal2-container')
+  containers.forEach(container => {
+    if (container.parentNode) {
+      container.parentNode.removeChild(container)
+    }
+  })
+  
+  // Restaurar el scroll del body
+  restoreBodyScroll()
+}
+
 // Configuración base para SweetAlert2 con temática fantasy
 const fantasyTheme = {
   customClass: {
@@ -83,11 +149,8 @@ export const showSuccessAlert = (title: string, text?: string) => {
     allowEscapeKey: true,
     showCloseButton: true,
     didClose: () => {
-      // Forzar limpieza completa del modal
-      const swalContainer = document.querySelector('.swal2-container')
-      if (swalContainer) {
-        swalContainer.remove()
-      }
+      // Limpiar completamente el modal y restaurar scroll
+      cleanupModals()
     }
   })
 }
@@ -109,11 +172,8 @@ export const showErrorAlert = (title: string, text?: string) => {
     allowEscapeKey: true,
     showCloseButton: true,
     didClose: () => {
-      // Forzar limpieza completa del modal
-      const swalContainer = document.querySelector('.swal2-container')
-      if (swalContainer) {
-        swalContainer.remove()
-      }
+      // Limpiar completamente el modal y restaurar scroll
+      cleanupModals()
     }
   })
 }
@@ -135,11 +195,8 @@ export const showWarningAlert = (title: string, text?: string) => {
     allowEscapeKey: true,
     showCloseButton: true,
     didClose: () => {
-      // Forzar limpieza completa del modal
-      const swalContainer = document.querySelector('.swal2-container')
-      if (swalContainer) {
-        swalContainer.remove()
-      }
+      // Limpiar completamente el modal y restaurar scroll
+      cleanupModals()
     }
   })
 }
@@ -161,11 +218,8 @@ export const showInfoAlert = (title: string, text?: string) => {
     allowEscapeKey: true,
     showCloseButton: true,
     didClose: () => {
-      // Forzar limpieza completa del modal
-      const swalContainer = document.querySelector('.swal2-container')
-      if (swalContainer) {
-        swalContainer.remove()
-      }
+      // Limpiar completamente el modal y restaurar scroll
+      cleanupModals()
     }
   })
 }
@@ -190,11 +244,8 @@ export const showConfirmAlert = (title: string, text?: string) => {
     allowEscapeKey: true,
     showCloseButton: true,
     didClose: () => {
-      // Forzar limpieza completa del modal
-      const swalContainer = document.querySelector('.swal2-container')
-      if (swalContainer) {
-        swalContainer.remove()
-      }
+      // Limpiar completamente el modal y restaurar scroll
+      cleanupModals()
     }
   })
 }
@@ -221,22 +272,16 @@ export const showLoadingAlert = (title: string, text?: string) => {
 // Función para cerrar alertas de carga
 export const closeLoadingAlert = () => {
   Swal.close()
+  // Restaurar el scroll después de cerrar
+  restoreBodyScroll()
 }
 
 // Función para limpiar completamente todos los modales
 export const clearAllModals = () => {
-  // Cerrar todos los modales activos
-  Swal.close()
-  
-  // Limpiar todos los contenedores de SweetAlert2
-  const containers = document.querySelectorAll('.swal2-container')
-  containers.forEach(container => container.remove())
-  
-  // Limpiar el body de clases de SweetAlert2
-  document.body.classList.remove('swal2-shown', 'swal2-height-auto')
-  
-  // Limpiar el html de clases de SweetAlert2
-  document.documentElement.classList.remove('swal2-height-auto', 'swal2-no-backdrop')
+  cleanupModals()
 }
+
+// Función para restaurar el scroll del body (exportada para uso manual)
+export { restoreBodyScroll as restoreBodyScrollFunction }
 
 export default Swal

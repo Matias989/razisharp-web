@@ -1,8 +1,13 @@
 import type { AppProps } from 'next/app'
 import '../styles/globals.css'
 import Head from 'next/head'
+import { useBodyScroll } from '../lib/useBodyScroll'
+import '../lib/scrollRestore'
 
 export default function App({ Component, pageProps }: AppProps) {
+  // Usar el hook para manejar el scroll del body
+  useBodyScroll()
+
   return (
     <>
       <Head>

@@ -467,6 +467,67 @@
   display: none !important;
 }
 
+/* Asegurar que el body mantenga su scroll después de cerrar modales */
+body:not(.swal2-shown) {
+  overflow: auto !important;
+  padding-right: 0 !important;
+}
+
+/* Limpiar estilos residuales de SweetAlert2 */
+body.swal2-no-backdrop {
+  overflow: auto !important;
+  padding-right: 0 !important;
+}
+
+/* Asegurar que el html también mantenga su scroll */
+html:not(.swal2-height-auto) {
+  overflow: auto !important;
+}
+
+/* Forzar restauración del scroll en caso de problemas */
+body[style*="overflow: hidden"] {
+  overflow: auto !important;
+}
+
+/* Limpiar padding-right residual */
+body[style*="padding-right"] {
+  padding-right: 0 !important;
+}
+
+/* Estilos más agresivos para forzar la restauración del scroll */
+body {
+  overflow: auto !important;
+  padding-right: 0 !important;
+}
+
+/* Forzar que el body siempre tenga scroll habilitado */
+body.swal2-shown {
+  overflow: auto !important;
+  padding-right: 0 !important;
+}
+
+/* Limpiar cualquier estilo que pueda estar interfiriendo */
+body[style*="overflow"] {
+  overflow: auto !important;
+}
+
+/* Asegurar que el html también mantenga el scroll */
+html {
+  overflow: auto !important;
+}
+
+/* Limpiar clases residuales de SweetAlert2 */
+body.swal2-height-auto {
+  overflow: auto !important;
+  padding-right: 0 !important;
+}
+
+/* Forzar limpieza completa después de cerrar modales */
+.swal2-container:not(.swal2-backdrop-show) ~ body {
+  overflow: auto !important;
+  padding-right: 0 !important;
+}
+
 /* Responsive para SweetAlert2 */
 @media (max-width: 768px) {
   .fantasy-popup {
