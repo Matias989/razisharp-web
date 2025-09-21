@@ -157,15 +157,17 @@ export default function AnimesPage() {
               <Trophy className="w-4 h-4 mr-1" />
               Top 3
             </Link>
-            <Link href="/obs-config" className="btn-secondary text-sm flex items-center justify-center">
-              <Monitor className="w-4 h-4 mr-1" />
-              OBS
-            </Link>
             {user.isAdmin && (
-              <Link href="/admin/animes" className="btn-secondary text-sm flex items-center justify-center">
-                <Settings className="w-4 h-4 mr-1" />
-                Admin
-              </Link>
+              <>
+                <Link href="/obs-config" className="btn-secondary text-sm flex items-center justify-center">
+                  <Monitor className="w-4 h-4 mr-1" />
+                  OBS
+                </Link>
+                <Link href="/admin/animes" className="btn-secondary text-sm flex items-center justify-center">
+                  <Settings className="w-4 h-4 mr-1" />
+                  Admin
+                </Link>
+              </>
             )}
                     <button onClick={handleLogout} className="btn-ghost text-sm flex items-center justify-center">
                       <LogOut className="w-4 h-4 mr-1" />
