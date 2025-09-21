@@ -1,17 +1,33 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Star, Play, Pause, CheckCircle, ArrowLeft, LogOut, User, Crown, Settings, Trophy, Monitor } from 'lucide-react'
+import { Star, Play, Pause, CheckCircle, ArrowLeft, LogOut, User, Crown, Settings, Trophy, Monitor, Search, Filter, X, Loader2 } from 'lucide-react'
 import { Anime } from '../../types'
 import { showSuccessAlert, showErrorAlert, showWarningAlert } from '../../lib/sweetalert-config'
 
+interface PaginationInfo {
+  page: number
+  limit: number
+  total: number
+  hasMore: boolean
+  totalPages: number
+}
+
 export default function AnimesPage() {
   const [animes, setAnimes] = useState<Anime[]>([])
+  const [filteredAnimes, setFilteredAnimes] = useState<Anime[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [user, setUser] = useState<any>(null)
   const [voting, setVoting] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedGenre, setSelectedGenre] = useState('')
+  const [availableGenres, setAvailableGenres] = useState<string[]>([])
+  const [pagination, setPagination] = useState<PaginationInfo | null>(null)
+  const [hasMore, setHasMore] = useState(true)
+  const observerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     // Cargar animes
@@ -32,15 +48,62 @@ export default function AnimesPage() {
     }
   }, [])
 
-  const fetchAnimes = async () => {
+  // Aplicar filtros cuando cambien los términos de búsqueda o género
+  useEffect(() => {
+    let filtered = animes
+
+    // Filtrar por nombre
+    if (searchTerm) {
+      filtered = filtered.filter(anime =>
+        anime.title.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    }
+
+    // Filtrar por género
+    if (selectedGenre) {
+      filtered = filtered.filter(anime =>
+        anime.genres && anime.genres.includes(selectedGenre)
+      )
+    }
+
+    setFilteredAnimes(filtered)
+  }, [animes, searchTerm, selectedGenre])
+
+  const fetchAnimes = async (page = 1, append = false) => {
     try {
-      const response = await fetch('/api/animes')
+      if (append) {
+        setLoadingMore(true)
+      } else {
+        setLoading(true)
+      }
+
+      const response = await fetch(`/api/animes?page=${page}&limit=12`)
       const data = await response.json()
-      setAnimes(data)
+      
+      if (append) {
+        setAnimes(prev => [...prev, ...data.animes])
+        setFilteredAnimes(prev => [...prev, ...data.animes])
+      } else {
+        setAnimes(data.animes)
+        setFilteredAnimes(data.animes)
+        
+        // Extraer géneros únicos solo en la primera carga
+        const genres = new Set<string>()
+        data.animes.forEach((anime: Anime) => {
+          if (anime.genres) {
+            anime.genres.forEach(genre => genres.add(genre))
+          }
+        })
+        setAvailableGenres(Array.from(genres).sort())
+      }
+      
+      setPagination(data.pagination)
+      setHasMore(data.pagination.hasMore)
     } catch (error) {
       console.error('Error fetching animes:', error)
     } finally {
       setLoading(false)
+      setLoadingMore(false)
     }
   }
 
@@ -89,6 +152,47 @@ export default function AnimesPage() {
     setUser(null)
     window.location.href = '/'
   }
+
+  const clearFilters = () => {
+    setSearchTerm('')
+    setSelectedGenre('')
+  }
+
+  const clearSearch = () => {
+    setSearchTerm('')
+  }
+
+  const clearGenre = () => {
+    setSelectedGenre('')
+  }
+
+  const loadMoreAnimes = useCallback(() => {
+    if (hasMore && !loadingMore && pagination) {
+      fetchAnimes(pagination.page + 1, true)
+    }
+  }, [hasMore, loadingMore, pagination])
+
+  // Observer para scroll infinito
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          loadMoreAnimes()
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    if (observerRef.current) {
+      observer.observe(observerRef.current)
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observer.unobserve(observerRef.current)
+      }
+    }
+  }, [loadMoreAnimes, hasMore, loadingMore])
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -205,10 +309,103 @@ export default function AnimesPage() {
             </motion.p>
           </div>
 
+          {/* Filtros */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mb-8"
+          >
+            <div className="card-glow p-6">
+              <div className="flex flex-col lg:flex-row gap-4 items-center">
+                {/* Búsqueda por nombre */}
+                <div className="flex-1 w-full">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Buscar por nombre
+                  </label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input
+                      type="text"
+                      placeholder="Escribe el nombre del anime..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-10 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                    />
+                    {searchTerm && (
+                      <button
+                        onClick={clearSearch}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Filtro por género */}
+                <div className="flex-1 w-full">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Filtrar por género
+                  </label>
+                  <div className="relative">
+                    <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <select
+                      value={selectedGenre}
+                      onChange={(e) => setSelectedGenre(e.target.value)}
+                      className="w-full pl-10 pr-10 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent appearance-none"
+                    >
+                      <option value="">Todos los géneros</option>
+                      {availableGenres.map((genre) => (
+                        <option key={genre} value={genre}>
+                          {genre}
+                        </option>
+                      ))}
+                    </select>
+                    {selectedGenre && (
+                      <button
+                        onClick={clearGenre}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Botón limpiar filtros */}
+                {(searchTerm || selectedGenre) && (
+                  <div className="flex items-end">
+                    <button
+                      onClick={clearFilters}
+                      className="btn-ghost text-sm flex items-center justify-center"
+                    >
+                      <X className="w-4 h-4 mr-1" />
+                      Limpiar
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Contador de resultados */}
+              <div className="mt-4 text-center">
+                <span className="text-gray-400 text-sm">
+                  {filteredAnimes.length} de {pagination?.total || animes.length} animes
+                  {(searchTerm || selectedGenre) && ' encontrados'}
+                  {pagination && !searchTerm && !selectedGenre && (
+                    <span className="block mt-1 text-xs">
+                      Página {pagination.page} de {pagination.totalPages}
+                    </span>
+                  )}
+                </span>
+              </div>
+            </div>
+          </motion.div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {animes.map((anime, index) => (
+            {filteredAnimes.map((anime, index) => (
               <motion.div
-                key={anime._id}
+                key={`${anime._id}-${index}`}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -282,18 +479,72 @@ export default function AnimesPage() {
             ))}
           </div>
 
-          {animes.length === 0 && (
+          {/* Indicador de carga para scroll infinito */}
+          {loadingMore && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex justify-center py-8"
+            >
+              <div className="flex items-center space-x-2 text-cyan-400">
+                <Loader2 className="w-6 h-6 animate-spin" />
+                <span>Cargando más animes...</span>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Elemento observador para scroll infinito */}
+          {hasMore && !loadingMore && (
+            <div ref={observerRef} className="h-10" />
+          )}
+
+          {/* Mensaje cuando no hay más animes */}
+          {!hasMore && animes.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-8"
+            >
+              <div className="text-gray-400 text-sm">
+                ¡Has visto todos los animes disponibles!
+              </div>
+            </motion.div>
+          )}
+
+          {filteredAnimes.length === 0 && (
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               className="text-center py-16"
             >
               <Star className="w-16 h-16 text-gray-600 mx-auto mb-6" />
-              <h3 className="text-2xl text-gray-400 mb-4">No hay animes disponibles</h3>
-              <p className="text-gray-500 mb-6">Vuelve más tarde para ver la lista de animes</p>
-              <Link href="/" className="btn-primary">
-                Volver al Inicio
-              </Link>
+              {animes.length === 0 ? (
+                <>
+                  <h3 className="text-2xl text-gray-400 mb-4">No hay animes disponibles</h3>
+                  <p className="text-gray-500 mb-6">Vuelve más tarde para ver la lista de animes</p>
+                  <Link href="/" className="btn-primary">
+                    Volver al Inicio
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-2xl text-gray-400 mb-4">No se encontraron resultados</h3>
+                  <p className="text-gray-500 mb-6">
+                    No hay animes que coincidan con tu búsqueda
+                    {(searchTerm || selectedGenre) && (
+                      <span className="block mt-2">
+                        Intenta con otros términos o{' '}
+                        <button 
+                          onClick={clearFilters}
+                          className="text-cyan-400 hover:text-cyan-300 underline"
+                        >
+                          limpia los filtros
+                        </button>
+                      </span>
+                    )}
+                  </p>
+                </>
+              )}
             </motion.div>
           )}
         </div>

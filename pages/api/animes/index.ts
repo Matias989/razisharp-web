@@ -10,8 +10,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     switch (req.method) {
       case 'GET':
-        const animeList = await animes.find({}).sort({ votes: -1, createdAt: -1 }).toArray()
-        res.status(200).json(animeList)
+        const page = parseInt(req.query.page as string) || 1
+        const limit = parseInt(req.query.limit as string) || 12
+        const skip = (page - 1) * limit
+
+        const animeList = await animes
+          .find({})
+          .sort({ votes: -1, createdAt: -1 })
+          .skip(skip)
+          .limit(limit)
+          .toArray()
+
+        const total = await animes.countDocuments({})
+        const hasMore = skip + animeList.length < total
+
+        res.status(200).json({
+          animes: animeList,
+          pagination: {
+            page,
+            limit,
+            total,
+            hasMore,
+            totalPages: Math.ceil(total / limit)
+          }
+        })
         break
 
       case 'POST':
